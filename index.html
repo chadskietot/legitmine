@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<!-- File: dashboard.html -->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LegitMine Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js"></script>
+  <style>
+    body {
+      background-color: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+    .dashboard {
+      max-width: 700px;
+      margin: auto;
+      background-color: #222;
+      padding: 2rem;
+      border-radius: 8px;
+    }
+    .card {
+      margin-top: 1rem;
+      background: #333;
+      padding: 1rem;
+      border-left: 4px solid gold;
+      border-radius: 4px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logout {
+      background: crimson;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="header">
+      <h2>LegitMine Investor Dashboard</h2>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+    <p id="userEmail"></p>
+    <div id="investmentList"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8x43l3COmVy0z4ryumST3s-HVX9jVGto",
+      authDomain: "trong-rider-463113-f6.firebaseapp.com",
+      projectId: "trong-rider-463113-f6",
+      storageBucket: "trong-rider-463113-f6.appspot.com",
+      messagingSenderId: "640925169691",
+      appId: "1:640925169691:android:970e3e243f1e25ab5a20be"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById("userEmail").textContent = "Welcome, " + user.email;
+
+        db.collection("users").doc(user.uid).collection("investments").get()
+          .then(snapshot => {
+            if (snapshot.empty) 
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              const card = document.createElement("div");
+              card.className = "card";
+              card.innerHTML = `
+                <strong>Plan:</strong> ${data.plan}<br>
+                <strong>Amount:</strong> $${data.amount}<br>
+                <strong>Daily ROI:</strong> ${data.dailyROI}%<br>
+                <strong>Total Earnings:</strong> $${data.earnings}
+              `;
+              document.getElementById("investmentList").appendChild(card);
+            });
+          });
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+</body>
+</html>
+<!-- File: register.html -->
